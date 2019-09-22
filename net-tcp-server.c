@@ -15,13 +15,25 @@ struct usb_mouse_data{
 
 unsigned char frame_data[] = {
 	0x55, 0x55, 0x55, 0x55,/*frame head*/
-	0x00, 0x00, /*mouse id*/
+	0x00, 0x00, /*device id*/
 	0x00, /*frame count*/
+	0x00, /*mouse id*/
 	0x00, /*left right move*/
 	0x00, /* up down move*/
-	0xAA, 0xAA, 0xAA, 0xAA /*frame end*/
+	0xAA, 0xAA, 0xAA, 0xAA, /*frame end*/
+
 };
 
+unsigned char heart_frame_data[] = {
+	0x55, 0x55, 0x55, 0x55,/*frame head*/
+	0x00, 0x00, /*device id*/
+	0x00, /*frame count*/
+	0xff, /*mouse id*/
+	0xcf, /*left right move*/
+	0xfc, /* up down move*/
+	0xAA, 0xAA, 0xAA, 0xAA, /*frame end*/
+
+};
 
 
 #define portnum 3333
@@ -74,8 +86,19 @@ int main()
 			printf("server recv data:\n");
 			for (i = 0; i < sizeof(frame_data); i++)
 				printf("%x\n", frame_data[i]);
-
 			printf("\n");
+
+			if (frame_data[7] == 0xff) {
+				printf("heart beate packet\n");
+				{
+					int i = 0;
+					for (i = 0; i < sizeof(heart_frame_data); i++)
+						printf("%x ", heart_frame_data[i]);
+					printf("\n");
+
+				}
+				send(new_fd, heart_frame_data, sizeof(heart_frame_data),  MSG_NOSIGNAL);
+			}
 			#if 0
 			printf("id:%x\n%d %d %d %d\n\n", 
 				mouse.id, mouse.data[0], mouse.data[1], mouse.data[2], mouse.data[3]);
